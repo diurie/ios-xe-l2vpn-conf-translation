@@ -1,0 +1,121 @@
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime localtime show-timezone
+!
+hostname Device
+!
+logging buffered 100000
+no logging console
+!
+clock timezone CET 1 0
+clock summer-time CEST recurring last Sun Mar 2:00 last Sun Oct 3:00
+no ip source-route
+!
+no ip bootp server
+no ip domain lookup
+ip domain name domaintest.com
+login on-success log
+ipv6 unicast-routing
+!
+mpls label protocol ldp
+no mpls ip propagate-ttl 
+mpls ldp explicit-null
+mpls ldp graceful-restart
+mpls ldp session protection
+mpls ldp igp sync holddown 1000
+mpls ldp label
+ allocate global host-routes
+mpls ldp discovery targeted-hello accept
+no mpls mldp forwarding recursive
+xconnect logging pseudowire status
+xconnect logging redundancy
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ ipv6 address IPV6/128
+!
+interface TenGigabitEthernet0/0/7
+ description AC
+ no ip address
+ load-interval 30
+ service instance 101 ethernet
+  description L2VPN-CUST-1
+  encapsulation dot1q 101
+ !
+ service instance 102 ethernet
+  description L2VPN-CUST-2
+  encapsulation dot1q 102
+ !
+ service instance 103 ethernet
+  description L2VPN-CUST-3
+  encapsulation dot1q 103
+ !
+ service instance 104 ethernet
+  description L2VPN-CUST-4
+  encapsulation dot1q 104
+ !
+ service instance 105 ethernet
+  description L2VPN-CUST-5
+  encapsulation dot1q 105
+ !
+ service instance 106 ethernet
+  description L2VPN-CUST-6
+  encapsulation dot1q 106
+ !
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http ctc authentication
+no ip http secure-server
+!
+logging alarm informational
+logging trap debugging
+logging origin-id hostname
+logging facility syslog
+!
+mpls ldp router-id Loopback0 force
+!
+l2vpn xconnect context L2VPN-CUST-1
+ member TenGigabitEthernet0/0/1 service-instance 101
+ member 1.2.3.4 1010000 encapsulation mpls group L2VPN-CUST-1
+ redundancy predictive enabled
+ redundancy delay 0 30 group L2VPN-CUST-1
+!
+l2vpn xconnect context L2VPN-CUST-2
+ member TenGigabitEthernet0/0/1 service-instance 102
+ member 1.2.3.4 1020000 encapsulation mpls group L2VPN-CUST-2
+ redundancy predictive enabled
+ redundancy delay 0 30 group L2VPN-CUST-2
+!
+l2vpn xconnect context L2VPN-CUST-3
+ member TenGigabitEthernet0/0/1 service-instance 103
+ member 1.2.3.4 1030000 encapsulation mpls group L2VPN-CUST-3
+ redundancy predictive enabled
+ redundancy delay 0 30 group L2VPN-CUST-3
+!
+l2vpn xconnect context L2VPN-CUST-4
+ member TenGigabitEthernet0/0/1 service-instance 104
+ member 1.2.3.4 1040000 encapsulation mpls group L2VPN-CUST-4
+ member 1.2.3.5 1040000 encapsulation mpls group L2VPN-CUST-4 priority 1
+ redundancy predictive enabled
+ redundancy delay 0 30 group L2VPN-CUST-4
+!
+l2vpn xconnect context L2VPN-CUST-5
+ member TenGigabitEthernet0/0/1 service-instance 105
+ member 1.2.3.4 1050000 encapsulation mpls
+!
+l2vpn xconnect context L2VPN-CUST-6
+ member TenGigabitEthernet0/0/1 service-instance 106
+ member 1.2.3.4 1060000 encapsulation mpls group L2VPN-CUST-6
+ member 1.2.3.5 1060000 encapsulation mpls group L2VPN-CUST-6 priority 1
+ redundancy predictive enabled
+ redundancy delay 0 30 group L2VPN-CUST-6
+!
+router isis ISIS
+!
+router bgp 12345
+!
+control-plane
+!
+end
