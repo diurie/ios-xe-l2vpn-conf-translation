@@ -76,6 +76,30 @@ logging facility syslog
 !
 mpls ldp router-id Loopback0 force
 !
+l2 vfi VFI-CUSTUMER1 manual 
+ vpn id 1234
+ bridge-domain 1234
+ mtu 9180
+ neighbor 192.168.1.1 19216811 encapsulation mpls
+ neighbor 192.168.1.2 19216812 encapsulation mpls
+ neighbor 192.168.1.3 19216813 encapsulation mpls
+ neighbor 192.168.1.4 19216814 encapsulation mpls
+ neighbor 192.168.1.5 19216815 encapsulation mpls
+ neighbor 192.168.1.6 19216816 encapsulation mpls
+ neighbor 192.168.1.7 19216817 encapsulation mpls
+!
+l2 vfi VFI-CUSTUMER1 manual 
+ vpn id 5678
+ bridge-domain 5678
+ mtu 9180
+ neighbor 192.168.2.1 19216821 encapsulation mpls
+ neighbor 192.168.2.2 19216822 encapsulation mpls
+ neighbor 192.168.2.3 19216823 encapsulation mpls
+ neighbor 192.168.2.4 19216824 encapsulation mpls
+ neighbor 192.168.2.5 19216825 encapsulation mpls
+ neighbor 192.168.2.6 19216826 encapsulation mpls
+ neighbor 192.168.2.7 19216827 encapsulation mpls
+!
 l2vpn xconnect context L2VPN-CUST-1
  member TenGigabitEthernet0/0/1 service-instance 101
  member 1.2.3.4 1010000 encapsulation mpls group L2VPN-CUST-1
