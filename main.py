@@ -22,7 +22,7 @@ def txtfilesonly(listdir):
 
 
 def openfile(pathtofile):
-    with open(pathtofile) as file:
+    with open(pathtofile, encoding="utf-8") as file:
         content = file.readlines()
     content = [x.strip() for x in content]
     return content
@@ -59,17 +59,20 @@ def l2vpnparsing(config):
                 'vfiOffsetId': [],
             }
             pwDict[l2vpnID - 1]['l2vpnVfiName'] = re.search(r'vfi.*', line).group(0)[4:-7]
-        elif re.search(r'vpn id', line):
+        elif re.search(r'vpn id', line) and re.search(r'vfi.*', prevLine):
             pwDict[l2vpnID - 1]['vpnId'] = re.search(r'(\d+)', line).group(0)
-        elif re.search(r'bridge-domain', line):
+        elif re.search(r'bridge-domain', line) and re.search(r'vpn id', prevLine):
             pwDict[l2vpnID - 1]['bridgeDomain'] = re.search(r'(\d+)', line).group(0)
-        elif re.search(r'mtu', line):
+        elif re.search(r'mtu', line) and re.search(r'bridge-domain', prevLine):
             pwDict[l2vpnID - 1]['mtu'] = re.search(r'(\d+)', line).group(0)
-        elif re.search(r'neighbor', line):
+        elif re.search(r'neighbor.*encapsulation mpls', line):
             vfiOffsetId += 1
             pwDict[l2vpnID - 1]['pwMember'].append(re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0))
-            pwDict[l2vpnID - 1]['vcId'].append(re.findall(r'(\d+)', line)[4])
             pwDict[l2vpnID - 1]['vfiOffsetId'].append(vfiOffsetId)
+            if len(re.findall(r'(\d+)', line)) < 5:
+                pwDict[l2vpnID - 1]['vcId'].append("No VC-ID Configured")
+            else:
+                pwDict[l2vpnID - 1]['vcId'].append(re.findall(r'(\d+)', line)[4])
         
         if re.search('l2vpn xconnect', line):
             # Increase of L2VPN ID
@@ -131,6 +134,8 @@ def l2vpnparsing(config):
                 pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId + 1000)
             # Increase the number of Remote Neighbor
             nbPw += 1
+        
+        prevLine = line
     return pwDict
 
 
