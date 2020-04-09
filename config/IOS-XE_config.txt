@@ -30,6 +30,12 @@ no mpls mldp forwarding recursive
 xconnect logging pseudowire status
 xconnect logging redundancy
 !
+template type pseudowire PW-TEMPLATE
+ encapsulation mpls
+ control-word include
+ load-balance flow ip src-dst-ip
+ load-balance flow-label both
+!
 interface Loopback0
  ip address 1.1.1.1 255.255.255.255
  ipv6 address IPV6/128

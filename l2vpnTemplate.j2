@@ -1,5 +1,22 @@
 
 
+{% if l2vpnVfiName %}
+{% for member in pwMember -%}
+interface pseudowire {{ vfiOffsetId[loop.index0] }}
+ source template type pseudowire FAT-PW
+ neighbor {{ member }} {{ vcId[loop.index0] }}
+{% endfor %}
+bridge-domain {{ bridgeDomain }}
+ member vfi {{ l2vpnVfiName }}
+
+l2vpn vfi context {{ l2vpnVfiName }}
+ vpn id {{ vpnId }}
+ mtu {{ mtu }}
+    {%- for member in pwMember %}
+ member pseudowire{{ vfiOffsetId[loop.index0] }}
+    {%- endfor %}
+
+{% elif l2vpnContextName %}
 {% for member in pwMember -%}
 interface pseudowire {{ pseudowireID[loop.index0] }}
  source template type pseudowire FAT-PW
@@ -7,15 +24,16 @@ interface pseudowire {{ pseudowireID[loop.index0] }}
 {% endfor -%}
 l2vpn xconnect context {{ l2vpnContextName }}
  member {{ l2vpnAC }} service-instance {{ serviceInstance }}
-{%- for member in pwMember %}
- {%- if redundancyGroupName and loop.index0 == 0 %}
+    {%- for member in pwMember %}
+        {%- if redundancyGroupName and loop.index0 == 0 %}
  member pseudowire{{ pseudowireID[loop.index0] }} encapsulation mpls group {{ redundancyGroupName }}
- {%- elif loop.index0 == 0 %}
+        {%- elif loop.index0 == 0 %}
  member pseudowire{{ pseudowireID[loop.index0] }} encapsulation mpls
- {%- endif %}
- {%- if redundancyGroupName and loop.index0 > 0 %}
+        {%- endif %}
+        {%- if redundancyGroupName and loop.index0 > 0 %}
  member pseudowire{{ pseudowireID[loop.index0] }} encapsulation mpls group {{ redundancyGroupName }} priority {{ priorityNumber }}
  redundancy predictive enabled
  redundancy delay 0 30 group {{ redundancyGroupName }}
- {%- endif %}
-{%- endfor %}
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}

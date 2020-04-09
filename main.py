@@ -8,6 +8,7 @@ import re
 import os
 import jinja2
 
+
 files = []
 jinjaTemplate = 'l2vpnTemplate.j2'
 pwDict = {}
@@ -33,10 +34,43 @@ def l2vpnparsing(config):
     variable in a Dictionary
     """
     l2vpnID = 0
-    pseudowireOffsetId1 = 0
-    pseudowireOffsetId2 = 10000
+    pseudowireOffsetId = 0
+    vfiOffsetId = 49900
 
     for line in config:
+        if re.search('l2 vfi', line):
+            # Increase of L2VPN ID
+            l2vpnID += 1
+
+            # Reset the number of remote PW to 1
+            nbPw = 1
+
+            # Increase the pseudowire offset
+            vfiOffsetId += 100
+            vfiOffsetId = vfiOffsetId - abs(vfiOffsetId)%100
+            # Create new Dict inside the Main Dictionary with empty values
+            pwDict[l2vpnID - 1] = {
+                'l2vpnVfiName': '',
+                'vpnId': '',
+                'bridgeDomain': '',
+                'mtu': '',
+                'pwMember': [],
+                'vcId': [],
+                'vfiOffsetId': [],
+            }
+            pwDict[l2vpnID - 1]['l2vpnVfiName'] = re.search(r'vfi.*', line).group(0)[4:-7]
+        elif re.search(r'vpn id', line):
+            pwDict[l2vpnID - 1]['vpnId'] = re.search(r'(\d+)', line).group(0)
+        elif re.search(r'bridge-domain', line):
+            pwDict[l2vpnID - 1]['bridgeDomain'] = re.search(r'(\d+)', line).group(0)
+        elif re.search(r'mtu', line):
+            pwDict[l2vpnID - 1]['mtu'] = re.search(r'(\d+)', line).group(0)
+        elif re.search(r'neighbor', line):
+            vfiOffsetId += 1
+            pwDict[l2vpnID - 1]['pwMember'].append(re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0))
+            pwDict[l2vpnID - 1]['vcId'].append(re.findall(r'(\d+)', line)[4])
+            pwDict[l2vpnID - 1]['vfiOffsetId'].append(vfiOffsetId)
+        
         if re.search('l2vpn xconnect', line):
             # Increase of L2VPN ID
             l2vpnID += 1
@@ -45,8 +79,7 @@ def l2vpnparsing(config):
             nbPw = 1
 
             # Increase the pseudowire offset
-            pseudowireOffsetId1 += 1
-            pseudowireOffsetId2 += 1
+            pseudowireOffsetId += 1
 
             # Create new Dict inside the Main Dictionary with empty values
             pwDict[l2vpnID - 1] = {
@@ -60,7 +93,6 @@ def l2vpnparsing(config):
                 'pseudowireID': [],
             }
             pwDict[l2vpnID - 1]['l2vpnContextName'] = re.search(r'context.*', line).group(0)[8:]
-
         elif re.search(r'member.(Gig|Ten|Port)', line):
             """
             For each line that contains "member":
@@ -69,7 +101,6 @@ def l2vpnparsing(config):
             """
             pwDict[l2vpnID - 1]['l2vpnAC'] = re.search(r'(G|T|P).*ser', line).group(0)[:-4]
             pwDict[l2vpnID - 1]['serviceInstance'] = re.search(r'(\d+)$', line).group(0)
-
         elif re.search(r'member.(\d+).(\d+).(\d+).(\d+)', line):
             """
             For each line that contains "member" and an IP address:
@@ -94,10 +125,10 @@ def l2vpnparsing(config):
             pwMember = re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0)
             if nbPw == 1:
                 pwDict[l2vpnID - 1]['pwMember'].append(pwMember)
-                pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId1)
+                pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId)
             else:
                 pwDict[l2vpnID - 1]['pwMember'].append(pwMember)
-                pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId2)
+                pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId + 1000)
             # Increase the number of Remote Neighbor
             nbPw += 1
     return pwDict
@@ -108,7 +139,7 @@ def createnewconfig(dict, filename):
     Take a dict in input and create new L2VPN Configuration
     via Jinja2 Template
     """
-    for id, info in dict.items():
+    for info in dict.values():
         with open(jinjaTemplate) as file:
             tfile = file.read()
         template = jinja2.Template(tfile)
