@@ -38,6 +38,8 @@ def l2vpnparsing(config):
     vfiOffsetId = 49900
 
     for line in config:
+        
+        # If the line is a starting point for VFI Configuration
         if re.search('l2 vfi', line):
             # Increase of L2VPN ID
             l2vpnID += 1
@@ -60,20 +62,31 @@ def l2vpnparsing(config):
             }
             pwDict[l2vpnID - 1]['l2vpnVfiName'] = re.search(r'vfi.*', line).group(0)[4:-7]
         elif re.search(r'vpn id', line) and re.search(r'vfi.*', prevLine):
+            # Catch the VPN-ID of the VFI
             pwDict[l2vpnID - 1]['vpnId'] = re.search(r'(\d+)', line).group(0)
         elif re.search(r'bridge-domain', line) and re.search(r'vpn id', prevLine):
+            # Catch the BD-ID of the VFI
             pwDict[l2vpnID - 1]['bridgeDomain'] = re.search(r'(\d+)', line).group(0)
         elif re.search(r'mtu', line) and re.search(r'bridge-domain', prevLine):
+            # Catch the MTU of the VFI
             pwDict[l2vpnID - 1]['mtu'] = re.search(r'(\d+)', line).group(0)
         elif re.search(r'neighbor.*encapsulation mpls', line):
+            # Catch all remote neighbors of the VFI
             vfiOffsetId += 1
             pwDict[l2vpnID - 1]['pwMember'].append(re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0))
             pwDict[l2vpnID - 1]['vfiOffsetId'].append(vfiOffsetId)
+            
             if len(re.findall(r'(\d+)', line)) < 5:
+                """
+                The below if statement is to catch somehow a parser error in the configuration
+                that allow to configure a neighbor without a VC-ID like below:
+                neighbor 1.2.3.4 encapsulation mpls
+                """
                 pwDict[l2vpnID - 1]['vcId'].append("No VC-ID Configured")
             else:
                 pwDict[l2vpnID - 1]['vcId'].append(re.findall(r'(\d+)', line)[4])
         
+        # If the line is a starting point for P2P Configuration
         if re.search('l2vpn xconnect', line):
             # Increase of L2VPN ID
             l2vpnID += 1
