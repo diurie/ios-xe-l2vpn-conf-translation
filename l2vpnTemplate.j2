@@ -3,7 +3,7 @@
 {% if l2vpnVfiName %}
 {% for member in pwMember -%}
 interface pseudowire {{ vfiOffsetId[loop.index0] }}
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor {{ member }} {{ vcId[loop.index0] }}
 {% endfor %}
 bridge-domain {{ bridgeDomain }}
@@ -19,7 +19,7 @@ l2vpn vfi context {{ l2vpnVfiName }}
 {% elif l2vpnContextName %}
 {% for member in pwMember -%}
 interface pseudowire {{ pseudowireID[loop.index0] }}
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor {{ member }} {{ vcId }}
 {% endfor -%}
 l2vpn xconnect context {{ l2vpnContextName }}
