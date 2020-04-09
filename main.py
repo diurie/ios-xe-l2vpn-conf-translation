@@ -113,7 +113,7 @@ def createnewconfig(dict, filename):
             tfile = file.read()
         template = jinja2.Template(tfile)
         templateOutput = template.render(info)
-        with open(f'config/FAT-PW_{filename}', 'a+') as outfile:
+        with open(f'config/L2VPN-NEW_{filename}', 'a+') as outfile:
             outfile.write(templateOutput)
         outfile.close()
     print(f'Treatment done, file created is FAT-PW_{filename}')
