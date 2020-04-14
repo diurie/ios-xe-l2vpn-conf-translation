@@ -85,15 +85,6 @@ template type pseudowire PW-TEMPLATE
  load-balance flow-label both
 ```
 
-## Running the code
-
-All devices configuration can be pushed in the "config" folder. The script:
-* Will iterate on all devices configuration
-* Will extract only `l2vpn xconnect context <L2VPN_NAME>` section and convert it
-* Will extract only `l2 vfi <VFI_NAME> manual` section and convert it
-
-A configuration example completly sanitized is available in the "config" folder.
-
 ## Installation
 
 Copy this repository to your local computer with `git clone`.
@@ -103,4 +94,18 @@ After that, you need to install the required packages in a virtual environment:
 python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
+```
+
+## Running the code
+
+All devices configuration can be pushed in the "config" folder. The script:
+* Will iterate on all devices configuration
+* Will extract only `l2vpn xconnect context <L2VPN_NAME>` section and convert it
+* Will extract only `l2 vfi <VFI_NAME> manual` section and convert it
+
+A configuration example completly sanitized is available in the "config" folder.
+
+When the devices configuration are placed in the "config" folder, just run the script as below:
+```
+python main.py
 ```
