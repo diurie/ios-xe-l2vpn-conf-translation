@@ -1,0 +1,17 @@
+
+{% if l2vpnVfiName %}
+{% for member in pwMember -%}
+interface pseudowire {{ vfiOffsetId[loop.index0] }}
+ source template type pseudowire PW-TEMPLATE
+ neighbor {{ member }} {{ vcId[loop.index0] }}
+{% endfor %}
+bridge-domain {{ bridgeDomain }}
+ member vfi {{ l2vpnVfiName }}
+
+l2vpn vfi context {{ l2vpnVfiName }}
+ vpn id {{ vpnId }}
+ mtu {{ mtu }}
+    {%- for member in pwMember %}
+ member pseudowire{{ vfiOffsetId[loop.index0] }}
+    {%- endfor %}
+{%- endif %}

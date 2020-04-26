@@ -1,26 +1,66 @@
 
 
+interface pseudowire 1
+ source template type pseudowire PW-TEMPLATE
+ neighbor 1.2.3.4 1010000
+l2vpn xconnect context L2VPN-CUST-1
+ member TenGigabitEthernet0/0/1 service-instance 101
+ member pseudowire1 encapsulation mpls group L2VPN
+
+interface pseudowire 2
+ source template type pseudowire PW-TEMPLATE
+ neighbor 1.2.3.4 1020000
+l2vpn xconnect context L2VPN-CUST-2
+ member TenGigabitEthernet0/0/1 service-instance 102
+ member pseudowire2 encapsulation mpls group L2VPN
+
+interface pseudowire 3
+ source template type pseudowire PW-TEMPLATE
+ neighbor 1.2.3.4 1030000
+l2vpn xconnect context L2VPN-CUST-3
+ member TenGigabitEthernet0/0/1 service-instance 103
+ member pseudowire3 encapsulation mpls group L2VPN
+
+interface pseudowire 4
+ source template type pseudowire PW-TEMPLATE
+ neighbor 1.2.3.4 1040000
+interface pseudowire 1004
+ source template type pseudowire PW-TEMPLATE
+ neighbor 1.2.3.5 1040000
+l2vpn xconnect context L2VPN-CUST-4
+ member TenGigabitEthernet0/0/1 service-instance 104
+ member pseudowire4 encapsulation mpls group L2VPN
+ member pseudowire1004 encapsulation mpls group L2VPN priority 1
+ redundancy predictive enabled
+ redundancy delay 0 30 group L2VPN
+
+interface pseudowire 5
+ source template type pseudowire PW-TEMPLATE
+ neighbor 1.2.3.4 1050000
+l2vpn xconnect context L2VPN-CUST-5
+ member TenGigabitEthernet0/0/1 service-instance 105
+ member pseudowire5 encapsulation mpls
 
 interface pseudowire 50001
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.1 19216811
 interface pseudowire 50002
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.2 19216812
 interface pseudowire 50003
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.3 19216813
 interface pseudowire 50004
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.4 19216814
 interface pseudowire 50005
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.5 19216815
 interface pseudowire 50006
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.6 19216816
 interface pseudowire 50007
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.1.7 19216817
 
 bridge-domain 1234
@@ -37,35 +77,32 @@ l2vpn vfi context VFI-CUSTUMER1
  member pseudowire50006
  member pseudowire50007
 
-
-
-
 interface pseudowire 50101
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.1 19216821
 interface pseudowire 50102
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.2 19216822
 interface pseudowire 50103
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.3 19216823
 interface pseudowire 50104
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.4 19216824
 interface pseudowire 50105
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.5 19216825
 interface pseudowire 50106
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.6 19216826
 interface pseudowire 50107
- source template type pseudowire FAT-PW
+ source template type pseudowire PW-TEMPLATE
  neighbor 192.168.2.7 19216827
 
 bridge-domain 5678
- member vfi VFI-CUSTUMER1
+ member vfi VFI-CUSTUMER2
 
-l2vpn vfi context VFI-CUSTUMER1
+l2vpn vfi context VFI-CUSTUMER2
  vpn id 5678
  mtu 9180
  member pseudowire50101
@@ -75,65 +112,3 @@ l2vpn vfi context VFI-CUSTUMER1
  member pseudowire50105
  member pseudowire50106
  member pseudowire50107
-
-
-
-
-interface pseudowire 1
- source template type pseudowire FAT-PW
- neighbor 1.2.3.4 1010000
-l2vpn xconnect context L2VPN-CUST-1
- member TenGigabitEthernet0/0/1 service-instance 101
- member pseudowire1 encapsulation mpls group L2VPN
-
-
-interface pseudowire 2
- source template type pseudowire FAT-PW
- neighbor 1.2.3.4 1020000
-l2vpn xconnect context L2VPN-CUST-2
- member TenGigabitEthernet0/0/1 service-instance 102
- member pseudowire2 encapsulation mpls group L2VPN
-
-
-interface pseudowire 3
- source template type pseudowire FAT-PW
- neighbor 1.2.3.4 1030000
-l2vpn xconnect context L2VPN-CUST-3
- member TenGigabitEthernet0/0/1 service-instance 103
- member pseudowire3 encapsulation mpls group L2VPN
-
-
-interface pseudowire 4
- source template type pseudowire FAT-PW
- neighbor 1.2.3.4 1040000
-interface pseudowire 1004
- source template type pseudowire FAT-PW
- neighbor 1.2.3.5 1040000
-l2vpn xconnect context L2VPN-CUST-4
- member TenGigabitEthernet0/0/1 service-instance 104
- member pseudowire4 encapsulation mpls group L2VPN
- member pseudowire1004 encapsulation mpls group L2VPN priority 1
- redundancy predictive enabled
- redundancy delay 0 30 group L2VPN
-
-
-interface pseudowire 5
- source template type pseudowire FAT-PW
- neighbor 1.2.3.4 1050000
-l2vpn xconnect context L2VPN-CUST-5
- member TenGigabitEthernet0/0/1 service-instance 105
- member pseudowire5 encapsulation mpls
-
-
-interface pseudowire 6
- source template type pseudowire FAT-PW
- neighbor 1.2.3.4 1060000
-interface pseudowire 1006
- source template type pseudowire FAT-PW
- neighbor 1.2.3.5 1060000
-l2vpn xconnect context L2VPN-CUST-6
- member TenGigabitEthernet0/0/1 service-instance 106
- member pseudowire6 encapsulation mpls group L2VPN
- member pseudowire1006 encapsulation mpls group L2VPN priority 1
- redundancy predictive enabled
- redundancy delay 0 30 group L2VPN

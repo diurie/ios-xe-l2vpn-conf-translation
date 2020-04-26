@@ -94,7 +94,7 @@ l2 vfi VFI-CUSTUMER1 manual
  neighbor 192.168.1.6 19216816 encapsulation mpls
  neighbor 192.168.1.7 19216817 encapsulation mpls
 !
-l2 vfi VFI-CUSTUMER1 manual 
+l2 vfi VFI-CUSTUMER2 manual 
  vpn id 5678
  bridge-domain 5678
  mtu 9180

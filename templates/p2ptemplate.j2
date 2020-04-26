@@ -1,0 +1,22 @@
+
+{% if l2vpnContextName %}
+{% for member in pwMember -%}
+interface pseudowire {{ pseudowireID[loop.index0] }}
+ source template type pseudowire PW-TEMPLATE
+ neighbor {{ member }} {{ vcId }}
+{% endfor -%}
+l2vpn xconnect context {{ l2vpnContextName }}
+ member {{ l2vpnAC }} service-instance {{ serviceInstance }}
+    {%- for member in pwMember %}
+        {%- if redundancyGroupName and loop.index0 == 0 %}
+ member pseudowire{{ pseudowireID[loop.index0] }} encapsulation mpls group {{ redundancyGroupName }}
+        {%- elif loop.index0 == 0 %}
+ member pseudowire{{ pseudowireID[loop.index0] }} encapsulation mpls
+        {%- endif %}
+        {%- if redundancyGroupName and loop.index0 > 0 %}
+ member pseudowire{{ pseudowireID[loop.index0] }} encapsulation mpls group {{ redundancyGroupName }} priority {{ priorityNumber }}
+ redundancy predictive enabled
+ redundancy delay 0 30 group {{ redundancyGroupName }}
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
