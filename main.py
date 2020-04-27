@@ -10,7 +10,7 @@ import jinja2
 
 
 files = []
-pwDict = {}
+pwdict = {}
 
 
 def txtfilesonly(listdir):
@@ -28,10 +28,8 @@ def openfile(pathtofile):
 
 
 def p2pparsing(config):
-    """
-    Parse p2p xconnect configuration
-    and put the useful variable in a Dictionary
-    """
+    # Input : A device configuration to work with {config}
+    # Output : A Dictionnary with all required information
     l2vpnID = 0
     pseudowireOffsetId = 0
 
@@ -40,15 +38,13 @@ def p2pparsing(config):
         if re.search('l2vpn xconnect', line):
             # Increase of L2VPN ID
             l2vpnID += 1
-
             # Reset the number of remote PW to 1
             nbPw = 1
-
             # Increase the pseudowire offset
             pseudowireOffsetId += 1
 
-            # Create new Dict inside the Main Dictionary with empty values
-            pwDict[l2vpnID - 1] = {
+            # Create new pwdict inside the Main dictionary with empty values
+            pwdict[l2vpnID - 1] = {
                 'l2vpnContextName': '',
                 'l2vpnAC': '',
                 'serviceInstance': '',
@@ -59,15 +55,15 @@ def p2pparsing(config):
                 'pseudowireID': [],
                 'templateJinja' : 'p2ptemplate.j2',
             }
-            pwDict[l2vpnID - 1]['l2vpnContextName'] = re.search(r'context.*', line).group(0)[8:]
+            pwdict[l2vpnID - 1]['l2vpnContextName'] = re.search(r'context.*', line).group(0)[8:]
         elif re.search(r'member.(Gig|Ten|Port)', line):
             """
             For each line that contains "member":
                 - Look for the pattern "member Gigabit|TenGigabit" and "member Port-channel" to identify the local AC
                 - Look for the service instance number at the end of the line, which is a number
             """
-            pwDict[l2vpnID - 1]['l2vpnAC'] = re.search(r'(G|T|P).*ser', line).group(0)[:-4]
-            pwDict[l2vpnID - 1]['serviceInstance'] = re.search(r'(\d+)$', line).group(0)
+            pwdict[l2vpnID - 1]['l2vpnAC'] = re.search(r'(G|T|P).*ser', line).group(0)[:-4]
+            pwdict[l2vpnID - 1]['serviceInstance'] = re.search(r'(\d+)$', line).group(0)
         elif re.search(r'member.(\d+).(\d+).(\d+).(\d+)', line):
             """
             For each line that contains "member" and an IP address:
@@ -76,30 +72,30 @@ def p2pparsing(config):
                 - Look for the redundancy-group name in this line
                 - Look for the priority-number in this line
             """
-            pwDict[l2vpnID - 1]['vcId'] = re.findall(r'(\d+)', line)[4]
+            pwdict[l2vpnID - 1]['vcId'] = re.findall(r'(\d+)', line)[4]
 
             if re.search('group', line):
-                pwDict[l2vpnID - 1]['redundancyGroupName'] = re.findall(r'(\w+)', line)[9]
+                pwdict[l2vpnID - 1]['redundancyGroupName'] = re.findall(r'(\w+)', line)[9]
                 if re.search('priority', line):
-                    pwDict[l2vpnID - 1]['priorityNumber'] = re.findall(r'(\w+)', line)[-1]
+                    pwdict[l2vpnID - 1]['priorityNumber'] = re.findall(r'(\w+)', line)[-1]
                 else:
-                    del pwDict[l2vpnID - 1]['priorityNumber']
+                    del pwdict[l2vpnID - 1]['priorityNumber']
             else:
-                del pwDict[l2vpnID - 1]['redundancyGroupName']
-                del pwDict[l2vpnID - 1]['priorityNumber']
+                del pwdict[l2vpnID - 1]['redundancyGroupName']
+                del pwdict[l2vpnID - 1]['priorityNumber']
 
             # Create as many remote neighbor as needed
             pwMember = re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0)
             if nbPw == 1:
-                pwDict[l2vpnID - 1]['pwMember'].append(pwMember)
-                pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId)
+                pwdict[l2vpnID - 1]['pwMember'].append(pwMember)
+                pwdict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId)
             else:
-                pwDict[l2vpnID - 1]['pwMember'].append(pwMember)
-                pwDict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId + 1000)
+                pwdict[l2vpnID - 1]['pwMember'].append(pwMember)
+                pwdict[l2vpnID - 1]['pseudowireID'].append(pseudowireOffsetId + 1000)
             # Increase the number of Remote Neighbor
             nbPw += 1
         
-    return pwDict
+    return pwdict
 
 
 def vfiexists(config):
@@ -110,10 +106,9 @@ def vfiexists(config):
 
 
 def vfiparsing(config, key):
-    """
-    Parse the vfi configuration 
-    and put the useful variable in a Dictionary
-    """
+    # Input : A device configuration to work with {config}
+    # Input : The last key used in the previous dictionnary {key}
+    # Output : A Dictionnary with all required information
     l2vpnID = key
     vfiOffsetId = 49900
 
@@ -122,15 +117,12 @@ def vfiparsing(config, key):
         if re.search('l2 vfi', line):
             # Increase of L2VPN ID
             l2vpnID += 1
-
-            # Reset the number of remote PW to 1
-            nbPw = 1
-
             # Increase the pseudowire offset
             vfiOffsetId += 100
             vfiOffsetId = vfiOffsetId - abs(vfiOffsetId)%100
-            # Create new Dict inside the Main Dictionary with empty values
-            pwDict[l2vpnID - 1] = {
+
+            # Create new dictionnary inside the Main dictionary with empty values
+            pwdict[l2vpnID - 1] = {
                 'l2vpnVfiName': '',
                 'vpnId': '',
                 'bridgeDomain': '',
@@ -140,21 +132,21 @@ def vfiparsing(config, key):
                 'vfiOffsetId': [],
                 'templateJinja' : 'vfitemplate.j2',
             }
-            pwDict[l2vpnID - 1]['l2vpnVfiName'] = re.search(r'vfi.*', line).group(0)[4:-7]
+            pwdict[l2vpnID - 1]['l2vpnVfiName'] = re.search(r'vfi.*', line).group(0)[4:-7]
         elif re.search(r'vpn id', line) and re.search(r'vfi.*', prevLine):
             # Catch the VPN-ID of the VFI
-            pwDict[l2vpnID - 1]['vpnId'] = re.search(r'(\d+)', line).group(0)
+            pwdict[l2vpnID - 1]['vpnId'] = re.search(r'(\d+)', line).group(0)
         elif re.search(r'bridge-domain', line) and re.search(r'vpn id', prevLine):
             # Catch the BD-ID of the VFI
-            pwDict[l2vpnID - 1]['bridgeDomain'] = re.search(r'(\d+)', line).group(0)
+            pwdict[l2vpnID - 1]['bridgeDomain'] = re.search(r'(\d+)', line).group(0)
         elif re.search(r'mtu', line) and re.search(r'bridge-domain', prevLine):
             # Catch the MTU of the VFI
-            pwDict[l2vpnID - 1]['mtu'] = re.search(r'(\d+)', line).group(0)
+            pwdict[l2vpnID - 1]['mtu'] = re.search(r'(\d+)', line).group(0)
         elif re.search(r'neighbor.*encapsulation mpls', line):
             # Catch all remote neighbors of the VFI
             vfiOffsetId += 1
-            pwDict[l2vpnID - 1]['pwMember'].append(re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0))
-            pwDict[l2vpnID - 1]['vfiOffsetId'].append(vfiOffsetId)
+            pwdict[l2vpnID - 1]['pwMember'].append(re.search(r'(\d+).(\d+).(\d+).(\d+)', line).group(0))
+            pwdict[l2vpnID - 1]['vfiOffsetId'].append(vfiOffsetId)
             
             if len(re.findall(r'(\d+)', line)) < 5:
                 """
@@ -162,20 +154,19 @@ def vfiparsing(config, key):
                 that allow to configure a neighbor without a VC-ID like below:
                 neighbor 1.2.3.4 encapsulation mpls
                 """
-                pwDict[l2vpnID - 1]['vcId'].append("No VC-ID Configured")
+                pwdict[l2vpnID - 1]['vcId'].append("No VC-ID Configured")
             else:
-                pwDict[l2vpnID - 1]['vcId'].append(re.findall(r'(\d+)', line)[4])
+                pwdict[l2vpnID - 1]['vcId'].append(re.findall(r'(\d+)', line)[4])
         
         prevLine = line
-    return pwDict
+    return pwdict
 
 
-def createnewconfig(dict, filename):
-    """
-    Take a dict in input and create 
-    new L2VPN Configuration via Jinja2 Template
-    """
-    for info in dict.values():
+def createnewconfig(pwdict, filename):
+    # Input : A dictionnary to work with {pwdict}
+    # Input : The name of the file {filename}
+    # Output : new L2VPN Configuration via Jinja2 Template
+    for info in pwdict.values():
         with open(f"templates/{info['templateJinja']}") as file:
             tfile = file.read()
         template = jinja2.Template(tfile)
@@ -194,16 +185,15 @@ def main():
         content = openfile(f'config/{filename}')
 
         # Parse P2P xconnect configuration
-        pwDict = p2pparsing(content)
-
+        pwdict = p2pparsing(content)
         # Parse VFI configuration if exists
         if vfiexists(content):
             #Retrieve the last key used in previous parsing
-            lastkey = list(pwDict.keys())[-1]
-            pwDict.update(vfiparsing(content, lastkey))
+            lastkey = list(pwdict.keys())[-1]
+            pwdict.update(vfiparsing(content, lastkey))
 
-        createnewconfig(pwDict, filename)
-        pwDict.clear()
+        createnewconfig(pwdict, filename)
+        pwdict.clear()
 
 
 if __name__ == '__main__':
