@@ -9,9 +9,6 @@ import os
 import jinja2
 
 
-#pwdict = {}
-
-
 def txtfilesonly(listdir):
     """Filter only .txt files in a directory.
 
