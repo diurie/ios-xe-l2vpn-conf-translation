@@ -33,7 +33,7 @@ def openfile(pathtofile):
 
 
 def p2pparsing(config):
-    """Parse running-config for L2VPN P2P configuration
+    """Parse running-config for L2VPN P2P configuration.
 
     Args:
         A device configuration {config}
@@ -71,7 +71,7 @@ def p2pparsing(config):
         elif re.search(r"member.(Gig|Ten|Port)", line):
             # For each line that contains "member":
             # -> To identify the local AC, look for the pattern:
-            # "member Gigabit|TenGigabit"
+            # "member Gigabit|TenGigabit" or,
             # "member Port-channel"
             # -> Look for the service instance number at the end of the line
             # which is a number
@@ -110,7 +110,7 @@ def p2pparsing(config):
 
 
 def vfiexists(config):
-    """Parse running-config to confirm if VFI exists
+    """Parse running-config to confirm if VFI exists.
 
     Args:
         A device configuration {config}
@@ -188,7 +188,7 @@ def vfiparsing(config, key):
 
 
 def createnewconfig(pwdict, filename):
-    """Create new configuration with Jinja2 Template
+    """Create new configuration with Jinja2 Template.
 
     Args:
         Actual configuration in a dictionnary {pwdict}
@@ -208,7 +208,7 @@ def createnewconfig(pwdict, filename):
 
 
 def main():
-    """Main
+    """Main Function.
 
     """
     entries = os.listdir("config/")
